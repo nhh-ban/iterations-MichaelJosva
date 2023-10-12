@@ -9,6 +9,7 @@ library(lubridate)
 library(anytime)
 library(readr)
 library(yaml)
+library(purrr)
 
 #### 1: Beginning of script
 
@@ -34,11 +35,34 @@ stations_metadata <-
 
 #### 2: Transforming metadata
 
-source("functions/data_transformations.r")
+source("functions/data_transformations.R")
+
+
+transform_metadata_to_data_frame <- function()
+  
+map(stations_metadata)
+
+df <- stations_metadata[[1]] %>% 
+  map_dfr(as.tibble) %>% 
+  mutate(latestData = map_chr(latestData, 1, .default = NA_character_)) |> 
+  mutate(latestData = as_datetime(latestData, tz = "UTC"))  |> 
+  unnest_wider(location) %>% 
+  unnest_wider(latLon)
+
+
+df
+
+
+list.rbind()
+
+stations_metadata[[1]][[1]]
+
+  
 
 stations_metadata_df <- 
-  stations_metadata %>% 
-  transform_metadata_to_df(.)
+stations_metadata %>% 
+transform_metadata_to_df(.)
+
 
 
 #### 3: Testing metadata
